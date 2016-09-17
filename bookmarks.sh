@@ -5,13 +5,24 @@ function bm() (
 
 # directory to store bookmarks - defaults to home dir
 local dir="${BOOKMARK_DIR:-$HOME/.bookmarks}"
-local bm=''
+local target=''
 mkdir -p "$dir"
 
 # basic usage instructions
 if [[ -z "$@" ]]; then
 	cat <<-'DOG'
-		Usage instructions:
+		usage: bm [--] <target>
+		       bm <command> [<args>]
+
+		COMMANDS
+
+		   add    Add a new bookmark without overwriting an existing one
+		   go     Go to the given target
+		   help   Display this message
+		   set    Add or overwrite an existing bookmark
+		   show   Show the target path of a given bookmark
+		   rm     Remove an existing bookmark
+
 	DOG
 	return 1
 fi
@@ -62,7 +73,7 @@ case "$1" in
 	;;
 
 	# remove an existing bookmark
-	'rm')
+	'rm' | 'remove')
 		# does it exist?
 		test_target "$2" || return $?
 		# is it a subdir or file of the actual bookmark?
@@ -70,27 +81,32 @@ case "$1" in
 			echo "Error: Target '$2' cannot be removed." >&2
 			return 2
 		fi
-		rm "$dir/$2"
+		rm "$dir/$2" || return $?
 		echo "Success: Removed target '$2' pointing to $PWD"
 	;;
 
 	# explicitly go to a bookmark, in case a reserved word is used
-	'go')
-		bm="$2"
+	'go' | '--')
+		target="$2"
+	;;
+
+	'help')
+		bm
 	;;
 
 	# default - assumes the arg is a bookmark
 	*)
-		bm="$1"
+		target="$1"
 	;;
 esac
 
-# no bookmark? we have completed some other action successfully
-[[ -z "$bm" ]] && return 0
-# go to the destination, if it exists
-test_target "$bm" || return $?
+# no target? we have completed some other action successfully
+[[ -z "$target" ]] && return 0
+
+# test that the target even exists
+test_target "$target" || return $?
 
 # go to the physical (-P) location that the symlink points to
-cd -P "$dir/$bm"
+cd -P "$dir/$target"
 
 ) # end bm()
