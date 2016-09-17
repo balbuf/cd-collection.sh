@@ -1,7 +1,11 @@
 #!/bin/sh
 
+# use parens instead of braces to allow interal helper functions
+function bm() (
+
 # directory to store bookmarks - defaults to home dir
-dir="${BOOKMARK_DIR:-$HOME/.bookmarks}"
+local dir="${BOOKMARK_DIR:-$HOME/.bookmarks}"
+local bm=''
 mkdir -p "$dir"
 
 # basic usage instructions
@@ -57,6 +61,19 @@ case "$1" in
 		readlink "$dir/$2"
 	;;
 
+	# remove an existing bookmark
+	'rm')
+		# does it exist?
+		test_target "$2" || return $?
+		# is it a subdir or file of the actual bookmark?
+		if ! test_name "$2" &> /dev/null; then
+			echo "Error: Target '$2' cannot be removed." >&2
+			return 2
+		fi
+		rm "$dir/$2"
+		echo "Success: Removed target '$2' pointing to $PWD"
+	;;
+
 	# explicitly go to a bookmark, in case a reserved word is used
 	'go')
 		bm="$2"
@@ -70,9 +87,10 @@ esac
 
 # no bookmark? we have completed some other action successfully
 [[ -z "$bm" ]] && return 0
-
 # go to the destination, if it exists
 test_target "$bm" || return $?
 
 # go to the physical (-P) location that the symlink points to
 cd -P "$dir/$bm"
+
+) # end bm()
