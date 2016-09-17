@@ -19,6 +19,7 @@ if [[ -z "$@" ]]; then
 		   add    Add a new bookmark without overwriting an existing one
 		   go     Go to the given target
 		   help   Display this message
+		   ls     List all existing bookmarks
 		   set    Add or overwrite an existing bookmark
 		   show   Show the target path of a given bookmark
 		   rm     Remove an existing bookmark
@@ -90,6 +91,17 @@ case "$1" in
 		target="$2"
 	;;
 
+	# list all of the bookmarks
+	'ls' | 'list')
+		local file
+		# iterate on the contents of the dir - use which in case ls is aliased
+		for file in $($(which ls) "$dir"); do
+			[[ -L "$dir/$file" && -d "$dir/$file" ]] || continue
+			echo "$file -> $(readlink "$dir/$file")"
+		done
+	;;
+
+	# display the help message
 	'help')
 		bm
 	;;
