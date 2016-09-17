@@ -1,20 +1,51 @@
 #!/bin/sh
-# todo: tab complete
-# todo: list all bms
-# todo: allow 2nd arg to add a sub dir (or slash after bookmark name)
-function bm() {
-  map=~/.bookmarks
-  # add a new bookmark?
-  if [[ "$1" == "add" && -n "$2" ]]; then
-    # todo - check for existing entry
-    echo "$2:$PWD" >> "$map"
-    echo "Success: Added bookmark '$2' for $PWD"
-    return 0
-  fi # todo add delete option
-  dest="$(grep "$1:" "$map" 2>/dev/null | cut -d ':' -f 2)"
-  if [[ -z "$dest" ]]; then
-    echo "No bookmark entry for $1"
-    return 1
-  fi
-  cd "$dest/$2"
-}
+
+# directory to store bookmarks - defaults to home dir
+dir="${BOOKMARK_DIR:-$HOME/.bookmarks}"
+mkdir -p "$dir"
+
+# basic usage instructions
+if [[ -z "$@" ]]; then
+	cat <<-'DOG'
+		Usage instructions:
+	DOG
+	return 1
+fi
+
+case "$1" in
+	# create a new bookmark or overwrite existing
+	'set')
+		# symlink name cannot contain a slash
+		if [[ "$2" == *\/* ]]; then
+			echo "Bookmark name cannot contain a forward slash" >&2
+			return 2
+		fi
+		# attempt to create the symlink
+		ln -sfn "$PWD" "$dir/$2" || return $?
+		echo "Success: Added '$2' pointing to $PWD"
+	;;
+
+	# explicitly go to a bookmark, in case a reserved word is used
+	'go')
+		bm="$2"
+	;;
+
+	# default - assumes the arg is a bookmark
+	*)
+		bm="$1"
+	;;
+esac
+
+# no bookmark? we have completed some other action successfully
+[[ -z "$bm" ]] && return 0
+
+# go to the destination, if it exists
+target="$dir/$bm"
+# does the target exist?
+if [[ ! -d "$target" ]]; then
+	echo "Target '$bm' does not exist." >&2
+	return 2
+fi
+
+# go to the physical (-P) location that the symlink points to
+cd -P "$target"
