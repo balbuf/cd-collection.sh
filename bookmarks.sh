@@ -97,8 +97,8 @@ case "$command" in
 		local target
 		# resolve the target
 		case "$command" in
-			# explicit commands
-			'go' | '--' | 'get')
+			# explicit commands / pseudo command '--'
+			'go' | 'get' | '--')
 				if [[ -z "$2" ]]; then
 					echo "Error: No target specified." >&2
 					return 2
@@ -106,7 +106,7 @@ case "$command" in
 				target="$2"
 			;;
 
-			# implicit commands
+			# implicit command
 			*)
 				# if there is a second arg, then the command is not valid
 				if [[ -n "$2" ]]; then
@@ -114,10 +114,6 @@ case "$command" in
 					return 2
 				fi
 				target="$1"
-				# if we are not in a terminal, implicit command is 'get'
-				if [[ ! -t 1 ]]; then
-					command='get'
-				fi
 			;;
 		esac
 		# does the target exist?
@@ -125,13 +121,13 @@ case "$command" in
 			echo "Error: '$target' is not a valid target." >&2
 			return 2
 		fi
-		# explicitly go to a bookmark, in case a reserved word is used
-		if [[ "$command" == 'get' ]]; then
-			# print the target
-			echo "$(cd -P "$dir/$target" && pwd)"
-		else
+		# we are going to the bookmark
+		if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 			# go to the physical (-P) location that the symlink points to
 			cd -P "$dir/$target"
+		else
+			# print the target
+			echo "$(cd -P "$dir/$target" && pwd)"
 		fi
 	;;
 esac
