@@ -16,6 +16,7 @@ if [[ -z "$@" || "$1" == 'help' ]]; then
 		   help   Display this message
 		   ls     List all existing targets
 		   set    Add or overwrite an existing target
+		   show   Show any targets pointing to the current directory
 		   rm     Remove an existing target
 
 	DOG
@@ -75,6 +76,19 @@ case "$command" in
 			# is it a symlink to a directory?
 			[[ -L "$file" && -d "$file" ]] || continue
 			echo "$(basename "$file") -> $(readlink "$file")"
+		done
+	;;
+
+	# show all of the targets pointing to the cwd
+	'show')
+		local file
+		# iterate on the contents of the dir
+		for file in "$dir/"*; do
+			# is it a symlink to a directory?
+			[[ -L "$file" && -d "$file" ]] || continue
+			if [[ "$PWD" -ef "$(readlink "$file")" ]]; then
+				echo "$(basename "$file")"
+			fi
 		done
 	;;
 
