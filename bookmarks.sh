@@ -97,7 +97,7 @@ case "$command" in
 		local target
 		# resolve the target
 		case "$command" in
-			# explicit commands / pseudo command '--'
+			# explicit commands / non-command '--'
 			'go' | 'get' | '--')
 				if [[ -z "$2" ]]; then
 					echo "Error: No target specified." >&2
@@ -121,12 +121,12 @@ case "$command" in
 			echo "Error: '$target' is not a valid target." >&2
 			return 2
 		fi
-		# we are going to the bookmark
+		# we are going to the target
 		if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 			# go to the physical (-P) location that the symlink points to
 			cd -P "$dir/$target"
 		else
-			# print the target
+			# just printing the target
 			echo "$(cd -P "$dir/$target" && pwd)"
 		fi
 	;;
