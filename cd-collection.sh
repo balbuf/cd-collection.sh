@@ -5,19 +5,19 @@ function cdc() {
 # basic usage instructions
 if [[ -z "$@" || "$1" == 'help' ]]; then
 	cat <<-'DOG'
-		usage: cdc [--] <target>
+		usage: cdc [--] <alias>[/<relative-path>]
 		       cdc <command> [<args>]
 
 		COMMANDS
 
-		   add    Add a new target without overwriting an existing one
-		   get    Get the path of a given target
-		   go     Go to the given target
+		   add    Add a new alias without overwriting an existing alias
+		   get    Get the path of a given alias
+		   go     Go to the path of the given alias
 		   help   Display this message
-		   ls     List all existing targets
-		   set    Add or overwrite an existing target
-		   show   Show any targets pointing to the current directory
-		   rm     Remove an existing target
+		   ls     List all existing aliases
+		   set    Add or overwrite an existing alias
+		   show   Show any aliases pointing to the current directory
+		   rm     Remove an existing alias
 
 	DOG
 	# test whether we ran the help command to determine what exit status to use
@@ -35,7 +35,7 @@ case "$command" in
 	'set' | 'add')
 		# check the name format
 		if [[ "$2" == *\/* ]]; then
-			echo 'Error: Target name cannot contain a forward slash.' >&2
+			echo 'Error: Alias name cannot contain a forward slash.' >&2
 			return 2
 		fi
 
@@ -48,7 +48,7 @@ case "$command" in
 			echo "Success: Set '$2' pointing to $PWD"
 		# otherwise check if it already exists
 		elif [[ -L "$dir/$2" ]]; then
-			echo "Error: Target '$2' already exists." >&2
+			echo "Error: Alias '$2' already exists." >&2
 			return 2
 		# otherwise add the symlink
 		else
@@ -57,18 +57,18 @@ case "$command" in
 		fi
 	;;
 
-	# remove an existing target
+	# remove an existing alias
 	'rm' | 'remove')
-		# is it a subdir or file of the actual target?
+		# is it a subdir or file of the actual alias?
 		if [[ "$2" == *\/* || ! -L "$dir/$2" ]]; then
-			echo "Error: '$2' is not a target that can be removed." >&2
+			echo "Error: '$2' is not an alias that can be removed." >&2
 			return 2
 		fi
 		rm "$dir/$2" || return $?
-		echo "Success: Removed target '$2'"
+		echo "Success: Removed alias '$2'"
 	;;
 
-	# list all of the targets
+	# list all of the aliases
 	'ls' | 'list')
 		local file
 		# iterate on the contents of the dir
@@ -79,7 +79,7 @@ case "$command" in
 		done
 	;;
 
-	# show all of the targets pointing to the cwd
+	# show all of the aliases pointing to the cwd
 	'show')
 		local file
 		# iterate on the contents of the dir
@@ -94,16 +94,16 @@ case "$command" in
 
 	# everything else
 	*)
-		local target
-		# resolve the target
+		local alias
+		# resolve the alias
 		case "$command" in
 			# explicit commands / non-command '--'
 			'go' | 'get' | '--')
 				if [[ -z "$2" ]]; then
-					echo "Error: No target specified." >&2
+					echo "Error: No alias specified." >&2
 					return 2
 				fi
-				target="$2"
+				alias="$2"
 			;;
 
 			# implicit command
@@ -113,21 +113,21 @@ case "$command" in
 					echo "Error: Unknown command '$command'" >&2
 					return 2
 				fi
-				target="$1"
+				alias="$1"
 			;;
 		esac
-		# does the target exist?
-		if [[ ! -d "$dir/$target" ]]; then
-			echo "Error: '$target' is not a valid target." >&2
+		# does the alias exist?
+		if [[ ! -d "$dir/$alias" ]]; then
+			echo "Error: '$alias' is not a valid alias." >&2
 			return 2
 		fi
-		# we are going to the target
+		# we are going to the alias
 		if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 			# go to the physical (-P) location that the symlink points to
-			cd -P "$dir/$target"
+			cd -P "$dir/$alias"
 		else
-			# just printing the target
-			echo "$(cd -P "$dir/$target" && pwd)"
+			# just printing the alias
+			echo "$(cd -P "$dir/$alias" && pwd)"
 		fi
 	;;
 esac
