@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # set default directory to store cd targets
-CD_COLLECTION="${CD_COLLECTION:-$HOME/.cdcollection}"
+CDC_DIR="${CDC_DIR:-$HOME/.cd_collection}"
 
 function cdc() {
 
@@ -45,19 +45,19 @@ case "$command" in
 		fi
 
 		# make sure dir exists
-		mkdir -p "$CD_COLLECTION"
+		mkdir -p "$CDC_DIR"
 
 		# attempt to add or overwrite the symlink
 		if [[ "$command" == 'set' ]]; then
-			ln -sfn "$PWD" "$CD_COLLECTION/$2" || return $?
+			ln -sfn "$PWD" "$CDC_DIR/$2" || return $?
 			echo "Success: Set '$2' pointing to $PWD"
 		# otherwise check if it already exists
-		elif [[ -L "$CD_COLLECTION/$2" ]]; then
+		elif [[ -L "$CDC_DIR/$2" ]]; then
 			echo "Error: Alias '$2' already exists." >&2
 			return 2
 		# otherwise add the symlink
 		else
-			ln -s "$PWD" "$CD_COLLECTION/$2" || return $?
+			ln -s "$PWD" "$CDC_DIR/$2" || return $?
 			echo "Success: Added '$2' pointing to $PWD"
 		fi
 	;;
@@ -65,11 +65,11 @@ case "$command" in
 	# remove an existing alias
 	rm | remove)
 		# is it a subdir or file of the actual alias?
-		if [[ "$2" == *\/* || ! -L "$CD_COLLECTION/$2" ]]; then
+		if [[ "$2" == *\/* || ! -L "$CDC_DIR/$2" ]]; then
 			echo "Error: '$2' is not an alias that can be removed." >&2
 			return 2
 		fi
-		rm "$CD_COLLECTION/$2" || return $?
+		rm "$CDC_DIR/$2" || return $?
 		echo "Success: Removed alias '$2'"
 	;;
 
@@ -77,7 +77,7 @@ case "$command" in
 	ls | list)
 		local file
 		# iterate on the contents of the dir
-		for file in "$CD_COLLECTION/"*; do
+		for file in "$CDC_DIR/"*; do
 			# is it a symlink to a directory?
 			[[ -L "$file" && -d "$file" ]] || continue
 			echo "$(basename "$file") -> $(readlink "$file")"
@@ -88,7 +88,7 @@ case "$command" in
 	show)
 		local file
 		# iterate on the contents of the dir
-		for file in "$CD_COLLECTION/"*; do
+		for file in "$CDC_DIR/"*; do
 			# is it a symlink to a directory?
 			[[ -L "$file" && -d "$file" ]] || continue
 			if [[ "$PWD" -ef "$(readlink "$file")" ]]; then
@@ -122,17 +122,17 @@ case "$command" in
 			;;
 		esac
 		# does the alias exist?
-		if [[ ! -d "$CD_COLLECTION/$alias" ]]; then
+		if [[ ! -d "$CDC_DIR/$alias" ]]; then
 			echo "Error: '$alias' is not a valid alias." >&2
 			return 2
 		fi
 		# we are going to the alias
 		if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 			# go to the physical (-P) location that the symlink points to
-			cd -P "$CD_COLLECTION/$alias"
+			cd -P "$CDC_DIR/$alias"
 		else
 			# just printing the alias
-			echo "$(cd -P "$CD_COLLECTION/$alias" && pwd)"
+			echo "$(cd -P "$CDC_DIR/$alias" && pwd)"
 		fi
 	;;
 esac
@@ -152,12 +152,12 @@ function _cdc() {
 
 		cdc | get | go | --)
 			# get directory completions relative to the cd collection dir and suffic with slash
-			COMPREPLY=( $(cd "$CD_COLLECTION"; compgen -d -S / -- "$2") )
+			COMPREPLY=( $(cd "$CDC_DIR"; compgen -d -S / -- "$2") )
 		;;
 
 		rm | remove | set)
 			# only return actual symlinks in our directory
-			COMPREPLY=( $(compgen -W "$(find "$CD_COLLECTION" -maxdepth 1 -type l -print0 | xargs -0 basename)" -- "$2" ) )
+			COMPREPLY=( $(compgen -W "$(find "$CDC_DIR" -maxdepth 1 -type l -print0 | xargs -0 basename)" -- "$2" ) )
 		;;
 
 	esac
