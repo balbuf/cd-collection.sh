@@ -138,3 +138,30 @@ case "$command" in
 esac
 
 } # end cdc()
+
+# tab completion
+function _cdc() {
+
+	# no completions henceforth!
+	if [[ $COMP_CWORD > 3 ]]; then
+		return 1
+	fi
+
+	# $3 is the word preceding the current tab completion word; $2 is the current word
+	case "$3" in
+
+		cdc | get | go | --)
+			# get directory completions relative to the cd collection dir and suffic with slash
+			COMPREPLY=( $(cd "$CD_COLLECTION"; compgen -d -S / -- "$2") )
+		;;
+
+		rm | remove | set)
+			# only return actual symlinks in our directory
+			COMPREPLY=( $(compgen -W "$(find "$CD_COLLECTION" -maxdepth 1 -type l -print0 | xargs -0 basename)" -- "$2" ) )
+		;;
+
+	esac
+
+}
+# use our custom complete function - don't add a space after completion
+complete -o nospace -o filenames -F _cdc cdc
