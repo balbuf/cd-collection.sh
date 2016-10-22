@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# set default directory to store cd targets
+CD_COLLECTION="${CD_COLLECTION:-$HOME/.cdcollection}"
+
 function cdc() {
 
 # basic usage instructions
@@ -20,19 +23,21 @@ if [[ -z "$@" || "$1" == 'help' ]]; then
 		   rm     Remove an existing alias
 
 	DOG
-	# test whether we ran the help command to determine what exit status to use
-	[[ "$1" == 'help' ]]
-	return $?
+	# return non-zero exit code if help was not explicitly invoked
+	return $([[ "$1" == 'help' ]]; echo $?)
 fi
 
-# directory to store bookmarks - defaults to home dir
-local dir="${CD_COLLECTION:-$HOME/.cdcollection}"
 local command="$1"
 
 # what command are we running?
 case "$command" in
+	# get the version number
+	--version)
+		echo 'cd Collection version 0.34'
+	;;
+
 	# create a new bookmark or overwrite existing
-	'set' | 'add')
+	set | add)
 		# check the name format
 		if [[ "$2" == *\/* ]]; then
 			echo 'Error: Alias name cannot contain a forward slash.' >&2
@@ -40,39 +45,39 @@ case "$command" in
 		fi
 
 		# make sure dir exists
-		mkdir -p "$dir"
+		mkdir -p "$CD_COLLECTION"
 
 		# attempt to add or overwrite the symlink
 		if [[ "$command" == 'set' ]]; then
-			ln -sfn "$PWD" "$dir/$2" || return $?
+			ln -sfn "$PWD" "$CD_COLLECTION/$2" || return $?
 			echo "Success: Set '$2' pointing to $PWD"
 		# otherwise check if it already exists
-		elif [[ -L "$dir/$2" ]]; then
+		elif [[ -L "$CD_COLLECTION/$2" ]]; then
 			echo "Error: Alias '$2' already exists." >&2
 			return 2
 		# otherwise add the symlink
 		else
-			ln -s "$PWD" "$dir/$2" || return $?
+			ln -s "$PWD" "$CD_COLLECTION/$2" || return $?
 			echo "Success: Added '$2' pointing to $PWD"
 		fi
 	;;
 
 	# remove an existing alias
-	'rm' | 'remove')
+	rm | remove)
 		# is it a subdir or file of the actual alias?
-		if [[ "$2" == *\/* || ! -L "$dir/$2" ]]; then
+		if [[ "$2" == *\/* || ! -L "$CD_COLLECTION/$2" ]]; then
 			echo "Error: '$2' is not an alias that can be removed." >&2
 			return 2
 		fi
-		rm "$dir/$2" || return $?
+		rm "$CD_COLLECTION/$2" || return $?
 		echo "Success: Removed alias '$2'"
 	;;
 
 	# list all of the aliases
-	'ls' | 'list')
+	ls | list)
 		local file
 		# iterate on the contents of the dir
-		for file in "$dir/"*; do
+		for file in "$CD_COLLECTION/"*; do
 			# is it a symlink to a directory?
 			[[ -L "$file" && -d "$file" ]] || continue
 			echo "$(basename "$file") -> $(readlink "$file")"
@@ -80,10 +85,10 @@ case "$command" in
 	;;
 
 	# show all of the aliases pointing to the cwd
-	'show')
+	show)
 		local file
 		# iterate on the contents of the dir
-		for file in "$dir/"*; do
+		for file in "$CD_COLLECTION/"*; do
 			# is it a symlink to a directory?
 			[[ -L "$file" && -d "$file" ]] || continue
 			if [[ "$PWD" -ef "$(readlink "$file")" ]]; then
@@ -98,7 +103,7 @@ case "$command" in
 		# resolve the alias
 		case "$command" in
 			# explicit commands / non-command '--'
-			'go' | 'get' | '--')
+			go | get | --)
 				if [[ -z "$2" ]]; then
 					echo "Error: No alias specified." >&2
 					return 2
@@ -117,17 +122,17 @@ case "$command" in
 			;;
 		esac
 		# does the alias exist?
-		if [[ ! -d "$dir/$alias" ]]; then
+		if [[ ! -d "$CD_COLLECTION/$alias" ]]; then
 			echo "Error: '$alias' is not a valid alias." >&2
 			return 2
 		fi
 		# we are going to the alias
 		if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 			# go to the physical (-P) location that the symlink points to
-			cd -P "$dir/$alias"
+			cd -P "$CD_COLLECTION/$alias"
 		else
 			# just printing the alias
-			echo "$(cd -P "$dir/$alias" && pwd)"
+			echo "$(cd -P "$CD_COLLECTION/$alias" && pwd)"
 		fi
 	;;
 esac
