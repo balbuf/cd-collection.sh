@@ -142,8 +142,8 @@ esac
 # tab completion
 function _cdc() {
 
-	# no completions henceforth!
-	if [[ $COMP_CWORD > 3 ]]; then
+	# bail for case where we wouldn't have completions
+	if [[ $COMP_CWORD > 2 ]] || [[ $COMP_CWORD == 2 && "$3" == cdc ]]; then
 		return 1
 	fi
 
