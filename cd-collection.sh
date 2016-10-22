@@ -64,9 +64,14 @@ function cdc() {
 
 		# remove an existing alias
 		rm | remove)
-			# is it a subdir or file of the actual alias?
-			if [[ "$2" == *\/* || ! -L "$CDC_DIR/$2" ]]; then
-				echo "Error: '$2' is not an alias that can be removed." >&2
+			# is this an actual alias?
+			if [[ -z $(find "$CDC_DIR" -type l -maxdepth 1 -name "$2") ]]; then
+				# but does the path actually exist?
+				if [[ -e "$CDC_DIR/$2" ]]; then
+					echo "Error: '$2' cannot be removed." >&2
+					return 2
+				fi
+				echo "Error: '$2' does not exist."
 				return 2
 			fi
 			rm "$CDC_DIR/$2" || return $?
