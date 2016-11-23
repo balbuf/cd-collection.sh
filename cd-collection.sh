@@ -46,18 +46,21 @@ function cdc() {
 			# make sure dir exists
 			mkdir -p "$CDC_DIR"
 
+			# determine the target (defaults to current directory)
+			local target="${3:-$PWD}"
+
 			# attempt to add or overwrite the symlink
 			if [[ "$command" == 'set' ]]; then
-				ln -sfn "$PWD" "$CDC_DIR/$2" || return $?
-				echo "Success: Set '$2' pointing to $PWD"
+				ln -sfn "$target" "$CDC_DIR/$2" || return $?
+				echo "Success: Set '$2' pointing to $target"
 			# otherwise check if it already exists
 			elif [[ -L "$CDC_DIR/$2" ]]; then
 				echo "Error: Alias '$2' already exists." >&2
 				return 2
 			# otherwise add the symlink
 			else
-				ln -s "$PWD" "$CDC_DIR/$2" || return $?
-				echo "Success: Added '$2' pointing to $PWD"
+				ln -s "$target" "$CDC_DIR/$2" || return $?
+				echo "Success: Added '$2' pointing to $target"
 			fi
 		;;
 
@@ -119,18 +122,27 @@ function cdc() {
 					alias="$1"
 				;;
 			esac
-			# does the alias exist?
-			if [[ ! -d "$CDC_DIR/$alias" ]]; then
+
+			# resolve the target
+			local target="$(readlink "$CDC_DIR/$alias")"
+			# is this a relative path?
+			if [[ ! "$target" = /* ]]; then
+				target="$PWD/$target"
+			fi
+
+			# does the target exist?
+			if [[ ! -d "$target" ]]; then
 				echo "Error: '$alias' is not a valid alias." >&2
 				return 2
 			fi
+
 			# we are going to the alias
 			if [[ "$command" == 'go' ]] || [[ "$command" != 'get' && -t 1 ]]; then
 				# go to the physical (-P) location that the symlink points to
-				cd -P "$CDC_DIR/$alias"
+				cd -P "$target"
 			else
 				# just printing the alias
-				echo "$(cd -P "$CDC_DIR/$alias" && pwd)"
+				echo "$(cd -P "$target" && pwd)"
 			fi
 		;;
 	esac
