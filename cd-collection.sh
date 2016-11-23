@@ -17,9 +17,8 @@ function cdc() {
 			   get    Get the path of a given alias
 			   go     Go to the path of the given alias
 			   help   Display this message
-			   ls     List all existing aliases
+			   ls     List all or some of the existing aliases
 			   set    Add or overwrite an existing alias
-			   show   Show any aliases pointing to the current directory
 			   rm     Remove an existing alias
 
 		DOG
@@ -78,7 +77,7 @@ function cdc() {
 			echo "Success: Removed alias '$2'"
 		;;
 
-		# list all of the aliases
+		# list all or some of the aliases
 		ls | list)
 			local file
 			# check if we are searching a specific directory
