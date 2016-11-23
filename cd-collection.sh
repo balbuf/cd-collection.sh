@@ -81,24 +81,18 @@ function cdc() {
 		# list all of the aliases
 		ls | list)
 			local file
+			# check if we are searching a specific directory
+			if [[ -n "$2" && ! -d "$2" ]]; then
+				echo "Error: '$2' is not a valid directory." >&2
+				return 2
+			fi
 			# iterate on the contents of the dir
 			for file in "$CDC_DIR/"*; do
 				# is it a symlink to a directory?
 				[[ -L "$file" && -d "$file" ]] || continue
+				# do we have a specific directory, and if so, does it match?
+				[[ -z "$2" || "$2" -ef "$(readlink "$file")" ]] || continue
 				echo "$(basename "$file") -> $(readlink "$file")"
-			done
-		;;
-
-		# show all of the aliases pointing to the cwd
-		show)
-			local file
-			# iterate on the contents of the dir
-			for file in "$CDC_DIR/"*; do
-				# is it a symlink to a directory?
-				[[ -L "$file" && -d "$file" ]] || continue
-				if [[ "$PWD" -ef "$(readlink "$file")" ]]; then
-					echo "$(basename "$file")"
-				fi
 			done
 		;;
 
@@ -156,7 +150,7 @@ function _cdc() {
 	case "$3" in
 
 		cdc | get | go | --)
-			# get directory completions relative to the cd collection dir and suffic with slash
+			# get directory completions relative to the cd collection dir and suffix with slash
 			COMPREPLY=( $(cd "$CDC_DIR"; compgen -d -S / -- "$2") )
 		;;
 
