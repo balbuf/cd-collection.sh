@@ -174,3 +174,37 @@ Delete an alias named "docs":
 ```sh
 $ cdc rm docs
 ```
+
+## Tab Completion
+
+`cdc` offers tab completion for completing alias names and directory names relative to the target directory of the alias.
+This behaves similarly to tab completion with the `cd` command itself.
+
+## Other Solutions
+
+Here are some other solutions you might consider installing for jumping around in your shell:
+- <https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/jump/jump.plugin.zsh>
+- <https://github.com/rupa/z>
+- <https://github.com/clvv/fasd>
+- <https://www.linux.com/learn/cdargs-brings-bookmarks-linux-command-line>
+
+Some solutions you can add to your `.bashrc` or equivalent:
+- To navigate up _n_ number of levels from a subdirectory:
+
+  ```sh
+  # Usage: `up` or `up n`, e.g. `up 3` to go up 3 directories, equivalient to cd ../../..
+  function up() {
+    [ -z "${1//[0-9]}" ] || return
+    cd $(printf '../%.s' $(seq 1 $1))
+  }
+  ```
+- To navigate to the root directory of the git repo you are within:
+
+  ```sh
+  # Goto root directory of current git repo
+  alias gcd='cd "$(git rev-parse --show-toplevel)"'
+  ```
+
+Some tricks you can use directly with `cd`:
+- `cd` (no arguments) to jump to your home directory, equivalent to `cd ~`
+- `cd -` to jump to the previous directory you were in before the last time you used `cd`
