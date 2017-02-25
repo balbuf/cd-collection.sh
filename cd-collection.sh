@@ -32,7 +32,7 @@ function cdc() {
 	case "$command" in
 		# get the version number
 		--version)
-			echo 'cd Collection version 0.34'
+			echo 'cd Collection version 0.3.4'
 		;;
 
 		# create a new bookmark or overwrite existing
