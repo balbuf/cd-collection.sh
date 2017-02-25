@@ -6,6 +6,28 @@ quickly jump to that location or use it as a jumping point to access relative
 subdirectories or parent directories. Aliases are unique, but a directory may
 have more than one alias.
 
+## Basic Usage
+
+```sh
+# navigate to a directory you cd into often
+/$ cd ~/Documents/
+
+# add a new cd alias to the current directory
+~/Documents$ cdc add docs
+Success: Added 'docs' pointing to /Users/balbuf/Documents
+
+# navigate elsewhere
+~/Documents$ cd /
+
+# execute `cdc` with your new alias name
+/$ cdc docs
+
+# you are taken to the target directory of your new alias
+~/Documents$
+```
+
+## Installation
+
 ## Commands
 
 ### add
@@ -95,7 +117,7 @@ Display a brief help message covering basic usage and a list of commands.
 > cdc help
 
 ```sh
-$ `cdc help`
+$ cdc help
 ```
 
 The same help message is displayed if `cdc` is executed with no arguments.
@@ -104,7 +126,26 @@ The same help message is displayed if `cdc` is executed with no arguments.
 
 See a list of some or all existing aliases.
 
-> cdc ls [<path>]
+> `cdc ls [<path>]`
+
+List all aliases:
+
+```sh
+$ cdc ls
+
+```
+
+List all aliases pointing to the current directory:
+
+```sh
+$ cdc ls .
+```
+
+List all aliases pointing to your ssh directory:
+
+```sh
+$ cdc ls ~/.ssh
+```
 
 ### set
 
@@ -120,8 +161,6 @@ $ cd ~/.ssh
 $ cdc set ssh
 ```
 
-show   Show any aliases pointing to the current directory
-
 ### rm (remove)
 
 Attempt to remove an existing alias. Returns an error if the alias is not valid
@@ -130,3 +169,8 @@ or if it cannot be removed.
 > `cdc rm <alias-name>`
 > `cdc remove <alias-name>`
 
+Delete an alias named "docs":
+
+```sh
+$ cdc rm docs
+```
