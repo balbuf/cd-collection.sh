@@ -192,7 +192,7 @@ Some solutions you can add to your `.bashrc` or equivalent:
 - To navigate up _n_ number of levels from a subdirectory:
 
   ```sh
-  # Usage: `up` or `up n`, e.g. `up 3` to go up 3 directories, equivalient to cd ../../..
+  # Usage: `up` or `up n`, e.g. `up 3` to go up 3 directories, equivalent to cd ../../..
   function up() {
     [ -z "${1//[0-9]}" ] || return
     cd $(printf '../%.s' $(seq 1 $1))
