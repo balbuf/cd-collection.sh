@@ -77,8 +77,12 @@ if [ -z "$FILE_URL" ]; then
 	exit 1
 fi
 
+# create directory for source file
+if ! mkdir -p "$(basename "$CDC_LOCATION")"; then
+	echo 'Could not create parent directory for source file'
+	exit 1
 # download cdc source file
-if ! curl -sLo "$CDC_LOCATION" "$FILE_URL"; then
+elif ! curl -sLo "$CDC_LOCATION" "$FILE_URL"; then
 	echo 'Problem downloading source file'
 	exit 1
 fi
