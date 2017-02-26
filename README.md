@@ -28,6 +28,20 @@ Success: Added 'docs' pointing to /Users/balbuf/Documents
 
 ## Installation
 
+To install, run the following line in your shell:
+
+```sh
+curl -L https://raw.githubusercontent.com/balbuf/cd-collection.sh/master/install.sh | sh
+```
+
+This will automatically download the latest release of the cdc source file
+and attempt to source it from your shell initialization file (e.g. `.bashrc` - determined
+based on the shell you are using). You can modify the behavior of the install
+script with the following environment variables:
+
+- `$CDC_LOCATION` to specify where you would like the source file to be downloaded to
+- `$INIT_FILE` to specify the path to your shell initialization file
+
 ## Commands
 
 ### add
