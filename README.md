@@ -31,7 +31,7 @@ Success: Added 'docs' pointing to /Users/balbuf/Documents
 To install, run the following line in your shell:
 
 ```sh
-curl -L https://raw.githubusercontent.com/balbuf/cd-collection.sh/master/install.sh | sh
+curl -sL https://raw.githubusercontent.com/balbuf/cd-collection.sh/master/install.sh | sh
 ```
 
 This will automatically download the latest release of the cdc source file

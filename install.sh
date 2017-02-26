@@ -103,7 +103,7 @@ else
 	# do we need to add our line?
 	if [ -z "$EXISTING_CDC" ]; then
 		# back up the original init file
-		cp "$INIT_FILE"
+		cp "$INIT_FILE" "$INIT_FILE"_cdc-backup_$(date +%Y-%m-%d:%H:%M:%S)
 		# add our line to the init file
 		echo ". $CDC_LOCATION $LINE_MARKER (see https://github.com/balbuf/cd-collection.sh)" >> "$INIT_FILE"
 	fi
