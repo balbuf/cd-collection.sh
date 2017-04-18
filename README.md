@@ -208,7 +208,7 @@ Some solutions you can add to your `.bashrc` or equivalent:
   ```sh
   # Usage: `up` or `up n`, e.g. `up 3` to go up 3 directories, equivalent to cd ../../..
   function up() {
-    [ -z "${1//[0-9]}" -a $1 -ne 0 ] || return
+    [ -z "${1//[0-9]}" -a ${1:-1} -ne 0 ] || return
     cd $(printf '../%.s' $(seq 1 $1))
   }
   ```
